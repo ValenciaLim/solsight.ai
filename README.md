@@ -47,7 +47,20 @@ npm install
 3. **Set up environment variables**
    Create a `.env.local` file in the root directory:
    ```env
+   # AI Integration
    OPENAI_API_KEY=your_openai_api_key_here
+   
+   # Envio (Blockchain Indexing)
+   NEXT_PUBLIC_ENVIO_GRAPHQL_ENDPOINT=http://localhost:8080/v1/graphql
+   NEXT_PUBLIC_ENVIO_HYPERSYNC_ENDPOINT=https://neon-evm.hypersync.xyz
+   
+   # Helius (Solana Data)
+   NEXT_PUBLIC_HELIUS_API_KEY=your_helius_api_key_here
+   
+   # Pyth Network (Price Data)
+   NEXT_PUBLIC_PYTH_ENDPOINT=https://hermes.pyth.network
+   
+   # Solana RPC
    NEXT_PUBLIC_SOLANA_RPC_URL=https://api.mainnet-beta.solana.com
    ```
 
@@ -102,11 +115,25 @@ The platform uses Vercel AI SDK for:
 
 ## 📊 Data Sources
 
-Currently uses mock data for:
-- Wallet balances and transactions
-- NFT holdings and floor prices
-- DeFi positions and yields
-- Market trends and analytics
+SolSight integrates real on-chain data from multiple sources:
+
+### Envio (Blockchain Indexing)
+- **HyperIndex**: Historical NFT transfer data via GraphQL
+- **HyperSync**: Real-time WebSocket streaming (available but not active)
+- **Network**: Neon Mainnet (EVM on Solana)
+- **Data**: NFT transfers indexed from smart contracts
+- See [ENVIO_INTEGRATION.md](./ENVIO_INTEGRATION.md) for details
+
+### Pyth Network (Price Data)
+- Real-time SOL/USD price feeds
+- Historical price data for analytics
+
+### Helius (Wallet Data)
+- Wallet portfolio data
+- Token balances and NFT holdings
+- Transaction history
+
+**Note**: Currently using mock data for wallet portfolios due to address format incompatibility (Ethereum vs Solana addresses from Envio).
 
 ## 🎨 Design System
 
