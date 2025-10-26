@@ -1,0 +1,55 @@
+{
+  "name": "solana-analytics-saas",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "cross-env NODE_TLS_REJECT_UNAUTHORIZED=0 next dev",
+    "build": "cross-env NODE_TLS_REJECT_UNAUTHORIZED=0 next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "@ai-sdk/openai": "^2.0.53",
+    "@ai-sdk/react": "^2.0.78",
+    "@solana/wallet-adapter-base": "^0.9.23",
+    "@solana/wallet-adapter-react": "^0.15.35",
+    "@solana/wallet-adapter-react-ui": "^0.9.35",
+    "@solana/wallet-adapter-wallets": "^0.19.32",
+    "@solana/web3.js": "^1.95.0",
+    "@web3auth/ws-embed": "^1.0.0",
+    "ai": "^5.0.78",
+    "class-variance-authority": "^0.7.0",
+    "clsx": "^2.0.0",
+    "date-fns": "^3.6.0",
+    "framer-motion": "^10.16.16",
+    "glob": "^10.0.0",
+    "html2canvas": "^1.4.1",
+    "jspdf": "^3.0.3",
+    "lru-cache": "^10.0.0",
+    "lucide-react": "^0.300.0",
+    "next": "^14.2.0",
+    "pino-pretty": "^13.1.2",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "recharts": "^2.10.3",
+    "rimraf": "^5.0.0",
+    "tailwind-merge": "^2.2.0",
+    "uuid": "^9.0.0"
+  },
+  "overrides": {
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.5",
+    "@types/react": "^18.2.45",
+    "@types/react-dom": "^18.2.18",
+    "autoprefixer": "^10.4.16",
+    "cross-env": "^10.1.0",
+    "eslint": "^8.57.0",
+    "eslint-config-next": "^14.0.0",
+    "postcss": "^8.4.32",
+    "tailwindcss": "^3.4.0",
+    "typescript": "^5.3.3"
+  }
+}
