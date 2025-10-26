@@ -8,6 +8,7 @@ import DashboardTabs from '../../../components/DashboardTabs'
 import DashboardSidebar from '../../../components/DashboardSidebar'
 import Chatbot from '../../../components/Chatbot'
 import { useAuth } from '../../../providers/AuthProvider'
+import { useWhaleData } from '../../../hooks/useWhaleData'
 import { 
   Bell, 
   AlertTriangle, 
@@ -58,6 +59,9 @@ export default function AlertsPage() {
   const [showExplainModal, setShowExplainModal] = useState<string | null>(null)
   const [explanation, setExplanation] = useState<string>('')
 
+  // Initialize whale data hook
+  const { whaleData } = useWhaleData(true)
+
   // Load dashboard from localStorage
   useEffect(() => {
     if (dashboardId) {
@@ -99,7 +103,7 @@ export default function AlertsPage() {
       const response = await fetch('/api/ai-alert', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ dashboardData: dashboard }),
+        body: JSON.stringify({ dashboardData: dashboard, whaleData }),
       })
       
       if (response.ok) {

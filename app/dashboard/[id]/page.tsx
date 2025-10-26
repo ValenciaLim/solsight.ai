@@ -10,6 +10,7 @@ import DashboardSidebar from '../../components/DashboardSidebar'
 import Chatbot from '../../components/Chatbot'
 import ChartWrapper from '../../components/ChartWrapper'
 import { useAuth } from '../../providers/AuthProvider'
+import { useWhaleData } from '../../hooks/useWhaleData'
 import { 
   LineChart, 
   Line, 
@@ -62,6 +63,9 @@ export default function DashboardPage() {
   const router = useRouter()
   const params = useParams()
   const dashboardId = params?.id as string
+
+  // Initialize whale data hook
+  const { whaleData, loading: whaleLoading } = useWhaleData(true)
 
   const [balance, setBalance] = useState(0)
   const [loading, setLoading] = useState(true)

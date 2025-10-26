@@ -7,6 +7,7 @@ import DashboardSidebar from '../../../components/DashboardSidebar'
 import DashboardTabs from '../../../components/DashboardTabs'
 import Chatbot from '../../../components/Chatbot'
 import { useAuth } from '../../../providers/AuthProvider'
+import { useWhaleData } from '../../../hooks/useWhaleData'
 import { FileText, Download, Plus, Trash2, Clock, BookOpen, Sparkles, Edit2, Save } from 'lucide-react'
 import jsPDF from 'jspdf'
 import html2canvas from 'html2canvas'
@@ -51,6 +52,9 @@ export default function ReportsPage() {
   const [editedContent, setEditedContent] = useState<Partial<Report>>({})
   const reportRef = useRef<HTMLDivElement>(null)
 
+  // Initialize whale data hook
+  const { whaleData } = useWhaleData(true)
+
   useEffect(() => {
     if (!dashboardId) return
 
@@ -92,7 +96,7 @@ export default function ReportsPage() {
       const response = await fetch('/api/ai-report', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ dashboardData }),
+        body: JSON.stringify({ dashboardData, whaleData }),
       })
       
       if (response.ok) {
