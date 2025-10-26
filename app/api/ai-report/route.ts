@@ -4,7 +4,7 @@ import { NextRequest, NextResponse } from 'next/server'
 
 export async function POST(request: NextRequest) {
   try {
-    const { dashboardData } = await request.json()
+    const { dashboardData, whaleData } = await request.json()
 
     // Build a summary of dashboard components
     const statsSummary = dashboardData?.config?.stats?.map((s: any) => `- ${s.label}: ${s.value}`).join('\n') || ''
@@ -14,6 +14,9 @@ export async function POST(request: NextRequest) {
       model: openai('gpt-4o-mini'),
       system: `You are an AI research report generator for Solana analytics dashboards.
 Generate a complete, professional research report based on the dashboard configuration.
+
+Available Data:
+- Data: ${JSON.stringify(whaleData)}
 
 Return ONLY a JSON object with this structure:
 {

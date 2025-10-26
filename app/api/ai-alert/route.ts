@@ -4,7 +4,7 @@ import { NextRequest, NextResponse } from 'next/server'
 
 export async function POST(request: NextRequest) {
   try {
-    const { dashboardData, userCommand } = await request.json()
+    const { dashboardData, userCommand, whaleData } = await request.json()
 
     const result = await generateText({
       model: openai('gpt-4o-mini'),
@@ -20,7 +20,9 @@ Return ONLY a JSON object with this structure:
     "description": "Detailed description of the alert",
     "condition": "Specific condition that triggered this alert",
     "recommendation": "Recommended action or insight",
-    "timestamp": "ISO timestamp"
+    "timestamp": "ISO timestamp",
+    "walletAddresses": ["address1", "address2"],
+    "collections": ["collection1", "collection2"]
   }
 }
 
@@ -30,9 +32,10 @@ Dashboard Focus: ${dashboardData.config?.researchFocus || 'General Analytics'}
 Charts: ${dashboardData.config?.charts?.length || 0}
 Stats: ${dashboardData.config?.stats?.length || 0}
 
-Generate an alert for this dashboard. ${
-        userCommand ? `User request: ${userCommand}` : 'Generate a relevant alert based on the dashboard.'
-      }`,
+Recent Activity:
+${whaleData?.transfers?.slice(0, 5).map((t: any) => `${t.fromWallet} → ${t.toWallet}: ${t.collection} @ ${t.amount} SOL`).join('\n') || 'No recent transfers'}
+
+${userCommand ? `User request: ${userCommand}` : 'Generate a relevant alert based on current activity and market patterns.'}`,
     })
 
     // Parse the response with robust error handling
