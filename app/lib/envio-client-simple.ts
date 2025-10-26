@@ -10,27 +10,17 @@ const ENVIO_HYPERSYNC_ENDPOINT = process.env.NEXT_PUBLIC_ENVIO_HYPERSYNC_ENDPOIN
 
 export interface NFTTransfer {
   id: string;
-  timestamp: number;
   from: string;
   to: string;
   tokenId: string;
-  transaction?: {
-    hash: string;
-    status: string;
-  };
 }
 
 export interface TransferQuery {
-  transfers: {
+  NeonEVMPointsNFT_Transfer: {
     id: string;
-    timestamp: string;
     from: string;
     to: string;
     tokenId: string;
-    transaction: {
-      hash: string;
-      status: string;
-    };
   }[];
 }
 
@@ -39,21 +29,12 @@ export interface TransferQuery {
  */
 export async function fetchNFTTransfers(limit: number = 50): Promise<NFTTransfer[]> {
   const query = `
-    query GetTransfers($limit: Int!) {
-      transfers(
-        first: $limit
-        orderBy: timestamp
-        orderDirection: desc
-      ) {
+    query {
+      NeonEVMPointsNFT_Transfer {
         id
-        timestamp
         from
         to
         tokenId
-        transaction {
-          hash
-          status
-        }
       }
     }
   `;
@@ -62,10 +43,7 @@ export async function fetchNFTTransfers(limit: number = 50): Promise<NFTTransfer
     const response = await fetch(ENVIO_GRAPHQL_ENDPOINT, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ 
-        query, 
-        variables: { limit } 
-      }),
+      body: JSON.stringify({ query }),
     });
 
     const data = await response.json();
@@ -75,13 +53,11 @@ export async function fetchNFTTransfers(limit: number = 50): Promise<NFTTransfer
       return [];
     }
 
-    const transfers: NFTTransfer[] = data.data.transfers.map((t: any) => ({
+    const transfers: NFTTransfer[] = (data.data?.NeonEVMPointsNFT_Transfer || []).map((t: any) => ({
       id: t.id,
-      timestamp: parseInt(t.timestamp),
       from: t.from,
       to: t.to,
-      tokenId: t.tokenId,
-      transaction: t.transaction,
+      tokenId: t.tokenId.toString(),
     }));
 
     return transfers;
@@ -97,13 +73,13 @@ export async function fetchNFTTransfers(limit: number = 50): Promise<NFTTransfer
 export async function getTransferStats() {
   const query = `
     query GetStats {
-      transferCount: transfers_aggregate {
+      transferCount: NeonEVMPointsNFT_Transfer_aggregate {
         aggregate {
           count
         }
       }
     }
-  `;
+    `;
 
   try {
     const response = await fetch(ENVIO_GRAPHQL_ENDPOINT, {
@@ -166,11 +142,9 @@ export function subscribeToNFTTransfers(
           const transfer = data.params.result;
           callback({
             id: transfer.id || transfer.transaction?.hash,
-            timestamp: transfer.timestamp || Date.now(),
             from: transfer.from,
             to: transfer.to,
             tokenId: transfer.tokenId,
-            transaction: transfer.transaction,
           });
         }
       } catch (error) {
