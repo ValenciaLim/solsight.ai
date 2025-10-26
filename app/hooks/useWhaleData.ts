@@ -59,24 +59,20 @@ export function useWhaleData(enabled: boolean = true) {
 
         // 3. Fetch wallet portfolios from Helius (top 10 wallets)
         console.log('💼 Fetching wallet portfolios from Helius...')
-        const topWallets = uniqueWallets.slice(0, 10)
-        const portfolios = await Promise.all(
-          topWallets.map(async (wallet) => {
-            try {
-              const portfolio = await fetchWalletPortfolio(wallet)
-              return { wallet, ...portfolio }
-            } catch (error) {
-              console.error(`Error fetching portfolio for ${wallet}:`, error)
-              return null
-            }
-          })
-        )
+        console.log('⚠️  Note: Envio returns Ethereum addresses (0x...), but Helius expects Solana addresses')
+        console.log('⚠️  Skipping Helius wallet portfolio fetch for now')
+        
+        // Skip Helius wallet portfolio fetch as Envio returns Ethereum addresses
+        // and Helius expects Solana addresses
+        // Instead, create mock whale wallet data from Envio transfers
+        const whaleWallets = uniqueWallets.slice(0, 5).map(wallet => ({
+          wallet,
+          solBalance: Math.random() * 1000 + 100, // Mock SOL balance 100-1100
+          tokens: [],
+          nftCount: Math.floor(Math.random() * 50),
+        }))
 
-        const whaleWallets = portfolios.filter(p => p !== null).filter((p: any) => 
-          p.solBalance > 10 // Only wallets with > 10 SOL
-        )
-
-        console.log(`✅ Found ${whaleWallets.length} whale wallets`)
+        console.log(`✅ Created ${whaleWallets.length} mock whale wallets from Envio transfers`)
 
         // 4. Fetch transaction history for top whale
         console.log('📜 Fetching transaction history...')
