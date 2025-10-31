@@ -25,7 +25,6 @@ import Link from 'next/link'
 export default function OnboardingPage() {
   const router = useRouter()
   const { connected } = useWallet()
-  const { user, isEnterprise } = useAuth()
   const [mode, setMode] = useState<'intention' | 'nlp'>('intention')
   const [userIntention, setUserIntention] = useState('')
   const [isGeneratingTemplates, setIsGeneratingTemplates] = useState(false)
@@ -47,7 +46,7 @@ export default function OnboardingPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
           userIntention,
-          userType: 'individual' // You can get this from auth context
+          userType: 'all' // All users have access to all features
         })
       })
       
@@ -88,22 +87,17 @@ export default function OnboardingPage() {
       createdAt: new Date().toISOString()
     }
     
-    // Get existing dashboards (enterprise or individual)
-    const storageKey = isEnterprise ? 'enterprise_dashboards' : 'dashboards'
-    const existingDashboards = JSON.parse(localStorage.getItem(storageKey) || '[]')
+    // Get existing dashboards
+    const existingDashboards = JSON.parse(localStorage.getItem('dashboards') || '[]')
     
     // Add new dashboard
     existingDashboards.push(dashboard)
     
     // Save to localStorage
-    localStorage.setItem(storageKey, JSON.stringify(existingDashboards))
+    localStorage.setItem('dashboards', JSON.stringify(existingDashboards))
     
-    // Redirect based on user type
-    if (isEnterprise) {
-      router.push(`/admin?dashboard=${dashboardId}`)
-    } else {
-      router.push(`/dashboard/${dashboardId}`)
-    }
+    // Redirect to dashboard
+    router.push(`/dashboard/${dashboardId}`)
   }
 
   const handleNLPSubmit = async () => {
@@ -136,23 +130,18 @@ export default function OnboardingPage() {
         createdAt: new Date().toISOString()
       }
       
-      // Get existing dashboards (enterprise or individual)
-      const storageKey = isEnterprise ? 'enterprise_dashboards' : 'dashboards'
-      const existingDashboards = JSON.parse(localStorage.getItem(storageKey) || '[]')
+      // Get existing dashboards
+      const existingDashboards = JSON.parse(localStorage.getItem('dashboards') || '[]')
       
       // Add new dashboard
       existingDashboards.push(dashboard)
       
       // Save to localStorage
-      localStorage.setItem(storageKey, JSON.stringify(existingDashboards))
+      localStorage.setItem('dashboards', JSON.stringify(existingDashboards))
       localStorage.setItem('onboardingData', JSON.stringify(result.config))
       
-      // Redirect based on user type
-      if (isEnterprise) {
-        router.push(`/admin?dashboard=${dashboardId}`)
-    } else {
-        router.push(`/dashboard/${dashboardId}`)
-      }
+      // Redirect to dashboard
+      router.push(`/dashboard/${dashboardId}`)
     } catch (error) {
       console.error('Error processing NLP command:', error)
       const errorMessage = error instanceof Error ? error.message : 'Failed to process your command. Please try again or use the template selection instead.'
@@ -162,8 +151,8 @@ export default function OnboardingPage() {
     }
   }
 
-  // Only require wallet connection for individual users
-  if (!isEnterprise && !connected) {
+  // Require wallet connection
+  if (!connected) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-purple-600 via-indigo-600 to-cyan-500 flex items-center justify-center">
         <div className="text-center text-white">
@@ -188,7 +177,7 @@ export default function OnboardingPage() {
         >
           {/* Header */}
           <div className="text-center mb-8">
-            <Link href={isEnterprise ? "/admin" : "/dashboard"} className="inline-flex items-center text-white hover:text-gray-200 mb-4">
+            <Link href="/dashboard" className="inline-flex items-center text-white hover:text-gray-200 mb-4">
               <ArrowLeft className="h-4 w-4 mr-2" />
               Back to Dashboard
             </Link>

@@ -4,7 +4,6 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { LayoutDashboard, Plus, X, Settings, Trash } from 'lucide-react'
-import { useAuth } from '../providers/AuthProvider'
 
 interface Dashboard {
   id: string
@@ -20,7 +19,6 @@ export default function DashboardSidebar({ onToggle }: DashboardSidebarProps) {
   const [isOpen, setIsOpen] = useState(true)
   const [dashboards, setDashboards] = useState<Dashboard[]>([])
   const pathname = usePathname()
-  const { isEnterprise } = useAuth()
 
   const handleToggle = (newState: boolean) => {
     setIsOpen(newState)
@@ -32,12 +30,10 @@ export default function DashboardSidebar({ onToggle }: DashboardSidebarProps) {
   // Load dashboards from localStorage on mount
   useEffect(() => {
     loadDashboards()
-  }, [isEnterprise])
+  }, [])
 
   const loadDashboards = () => {
-    // Use different localStorage key for enterprise users
-    const storageKey = isEnterprise ? 'enterprise_dashboards' : 'dashboards'
-    const savedDashboards = localStorage.getItem(storageKey)
+    const savedDashboards = localStorage.getItem('dashboards')
     if (savedDashboards) {
       const parsed = JSON.parse(savedDashboards)
       setDashboards(parsed.map((d: any) => ({ ...d, createdAt: new Date(d.createdAt) })))
@@ -49,13 +45,11 @@ export default function DashboardSidebar({ onToggle }: DashboardSidebarProps) {
     e.stopPropagation()
     
     if (confirm('Are you sure you want to delete this dashboard?')) {
-      // Use different localStorage key for enterprise users
-      const storageKey = isEnterprise ? 'enterprise_dashboards' : 'dashboards'
-      const savedDashboards = localStorage.getItem(storageKey)
+      const savedDashboards = localStorage.getItem('dashboards')
       if (savedDashboards) {
         const parsed = JSON.parse(savedDashboards)
         const filtered = parsed.filter((d: any) => d.id !== dashboardId)
-        localStorage.setItem(storageKey, JSON.stringify(filtered))
+        localStorage.setItem('dashboards', JSON.stringify(filtered))
         loadDashboards()
       }
     }

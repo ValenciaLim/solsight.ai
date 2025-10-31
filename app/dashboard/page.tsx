@@ -38,21 +38,6 @@ const iconMap: { [key: string]: any } = {
 import { PublicKey, Connection } from '@solana/web3.js'
 import { generateDashboardConfig, DashboardConfig, OnboardingData } from '../lib/dashboardGenerator'
 
-// Mock data for charts
-const portfolioData = [
-  { date: 'Jan', value: 10000 },
-  { date: 'Feb', value: 10500 },
-  { date: 'Mar', value: 11200 },
-  { date: 'Apr', value: 11000 },
-  { date: 'May', value: 12450 },
-]
-
-const nftData = [
-  { name: 'CryptoPunks', count: 3, value: 4500 },
-  { name: 'Bored Ape', count: 2, value: 3200 },
-  { name: 'Other', count: 5, value: 2100 },
-]
-
 export default function Dashboard() {
   const { connected, publicKey } = useWallet()
   const { connection } = useConnection()
@@ -89,7 +74,9 @@ export default function Dashboard() {
       }
     }
 
-    loadDashboardConfig()
+    // Defer loading to prevent blocking navigation
+    const timer = setTimeout(loadDashboardConfig, 0)
+    return () => clearTimeout(timer)
   }, [])
 
   useEffect(() => {
@@ -306,7 +293,7 @@ export default function Dashboard() {
               <div className="flex items-center justify-between p-4 bg-white rounded-lg">
                 <div>
                 <p className="font-medium text-gray-900">Data Providers</p>
-                  <p className="text-sm text-gray-500">Helius, Pyth Network, Jupiter API</p>
+                  <p className="text-sm text-gray-500">Helius API, Jupiter API</p>
                 </div>
                 <div className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm font-medium">
                   Real-time

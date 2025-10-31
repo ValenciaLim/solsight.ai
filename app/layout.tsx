@@ -4,6 +4,7 @@ import './globals.css'
 import { WalletProviderWrapper } from './providers/WalletProvider'
 import { AuthProvider } from './providers/AuthProvider'
 import Navbar from './components/Navbar'
+import PerformanceMonitor from './components/PerformanceMonitor'
 
 const inter = Inter({ 
   subsets: ['latin'], 
@@ -32,6 +33,7 @@ export default function RootLayout({
       <body className={inter.variable}>
         <WalletProviderWrapper>
           <AuthProvider>
+            <PerformanceMonitor />
             <Navbar />
             {children}
           </AuthProvider>

@@ -6,7 +6,6 @@ import { useParams, useRouter } from 'next/navigation'
 import DashboardSidebar from '../../../components/DashboardSidebar'
 import DashboardTabs from '../../../components/DashboardTabs'
 import Chatbot from '../../../components/Chatbot'
-import { useAuth } from '../../../providers/AuthProvider'
 import { useWhaleData } from '../../../hooks/useWhaleData'
 import { FileText, Download, Plus, Trash2, Clock, BookOpen, Sparkles, Edit2, Save } from 'lucide-react'
 import jsPDF from 'jspdf'
@@ -41,7 +40,6 @@ export default function ReportsPage() {
   const params = useParams()
   const router = useRouter()
   const dashboardId = params?.id as string
-  const { isEnterprise } = useAuth()
 
   const [sidebarOpen, setSidebarOpen] = useState(true)
   const [dashboardData, setDashboardData] = useState<any>(null)
@@ -660,17 +658,7 @@ export default function ReportsPage() {
     }
   }
 
-  if (!isEnterprise) {
-    return (
-      <div className="pt-16 h-screen flex items-center justify-center bg-gradient-to-br from-purple-50 via-indigo-50 to-cyan-50">
-        <div className="text-center">
-          <FileText className="h-16 w-16 text-gray-400 mx-auto mb-4" />
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">Enterprise Feature</h2>
-          <p className="text-gray-600">Reports are only available for enterprise users.</p>
-        </div>
-      </div>
-    )
-  }
+  // Removed enterprise check - all users can access reports now
 
   if (!dashboardData) {
     return (

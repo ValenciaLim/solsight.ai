@@ -7,17 +7,14 @@ import { useRouter } from 'next/navigation'
 interface User {
   id: string
   email?: string
-  role: 'individual' | 'enterprise'
   walletAddress?: string
   isAuthenticated: boolean
 }
 
 interface AuthContextType {
   user: User | null
-  login: (email: string, role: 'individual' | 'enterprise') => void
+  login: (email: string) => void
   logout: () => void
-  isEnterprise: boolean
-  isIndividual: boolean
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
@@ -26,23 +23,43 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const { connected, publicKey, disconnect } = useWallet()
   const router = useRouter()
   const [user, setUser] = useState<User | null>(null)
+  const [isHydrated, setIsHydrated] = useState(false)
 
   useEffect(() => {
-    // Check for stored user data
-    const storedUser = localStorage.getItem('user')
-    if (storedUser) {
-      setUser(JSON.parse(storedUser))
+    // Check for stored user data after mount (avoid SSR issues)
+    if (typeof window !== 'undefined') {
+      const storedUser = localStorage.getItem('user')
+      if (storedUser) {
+        try {
+          setUser(JSON.parse(storedUser))
+        } catch (e) {
+          console.error('Failed to parse stored user:', e)
+        }
+      }
+      setIsHydrated(true)
     }
   }, [])
 
   useEffect(() => {
     // Update user when wallet connects/disconnects
     if (connected && publicKey) {
-      setUser(prev => prev ? {
-        ...prev,
+      const updatedUser = {
+        id: Date.now().toString(),
         walletAddress: publicKey.toString(),
         isAuthenticated: true
-      } : null)
+      }
+      setUser(updatedUser)
+      
+      // Save to localStorage
+      if (typeof window !== 'undefined') {
+        const stored = localStorage.getItem('user')
+        if (stored) {
+          const parsed = JSON.parse(stored)
+          localStorage.setItem('user', JSON.stringify({ ...parsed, ...updatedUser }))
+        } else {
+          localStorage.setItem('user', JSON.stringify(updatedUser))
+        }
+      }
     } else if (!connected) {
       setUser(prev => prev ? {
         ...prev,
@@ -52,16 +69,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, [connected, publicKey])
 
-  const login = useCallback((email: string, role: 'individual' | 'enterprise') => {
+  const login = useCallback((email: string) => {
     const newUser: User = {
       id: Date.now().toString(),
       email,
-      role,
-      isAuthenticated: true
+      isAuthenticated: true,
+      walletAddress: publicKey?.toString()
     }
     setUser(newUser)
-    localStorage.setItem('user', JSON.stringify(newUser))
-  }, [])
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('user', JSON.stringify(newUser))
+    }
+  }, [publicKey])
 
   const logout = useCallback(async () => {
     setUser(null)
@@ -82,16 +101,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     router.push('/')
   }, [connected, disconnect, router])
 
-  const isEnterprise = user?.role === 'enterprise'
-  const isIndividual = user?.role === 'individual'
-
   return (
     <AuthContext.Provider value={{
       user,
       login,
-      logout,
-      isEnterprise,
-      isIndividual
+      logout
     }}>
       {children}
     </AuthContext.Provider>

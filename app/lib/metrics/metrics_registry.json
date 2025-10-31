@@ -1,0 +1,720 @@
+{
+  "metrics": [
+    {
+      "id": "nft_floor_price",
+      "domain": "nft_activity",
+      "source": "helius",
+      "type": "gauge",
+      "unit": "USD",
+      "description": "Current floor price of an NFT collection",
+      "endpoint": "/v0/collections/{collection}/floor-price",
+      "params": {
+        "collection": "string"
+      }
+    },
+    {
+      "id": "nft_floor_price_magiceden",
+      "domain": "nft_activity",
+      "source": "magiceden",
+      "type": "gauge",
+      "unit": "USD",
+      "description": "Current floor price from Magic Eden marketplace",
+      "endpoint": "/collections/{symbol}/stats"
+    },
+    {
+      "id": "nft_volume_24h",
+      "domain": "nft_activity",
+      "source": "helius",
+      "type": "counter",
+      "unit": "USD",
+      "description": "24-hour trading volume for NFT collection",
+      "endpoint": "/v0/collections/{collection}/transactions",
+      "params": {
+        "collection": "string",
+        "start_ts": "number",
+        "end_ts": "number"
+      }
+    },
+    {
+      "id": "nft_volume_7d",
+      "domain": "nft_activity",
+      "source": "magiceden",
+      "type": "counter",
+      "unit": "USD",
+      "description": "7-day trading volume from Magic Eden",
+      "endpoint": "/collections/{symbol}/stats"
+    },
+    {
+      "id": "nft_unique_holders",
+      "domain": "nft_activity",
+      "source": "helius",
+      "type": "gauge",
+      "unit": "count",
+      "description": "Number of unique holders of NFT collection",
+      "endpoint": "/v0/collections/{collection}/holders"
+    },
+    {
+      "id": "nft_transfers_count",
+      "domain": "nft_activity",
+      "source": "helius",
+      "type": "counter",
+      "unit": "count",
+      "description": "Total number of NFT transfers",
+      "endpoint": "/v0/addresses/{address}/transactions",
+      "params": {
+        "address": "string",
+        "type": "NFT_TRANSFER"
+      }
+    },
+    {
+      "id": "nft_recent_trades",
+      "domain": "nft_activity",
+      "source": "magiceden",
+      "type": "counter",
+      "unit": "count",
+      "description": "Recent trades in a collection",
+      "endpoint": "/collections/{symbol}/activities",
+      "params": {
+        "symbol": "string",
+        "limit": "number"
+      }
+    },
+    {
+      "id": "nft_listings_count",
+      "domain": "nft_activity",
+      "source": "magiceden",
+      "type": "gauge",
+      "unit": "count",
+      "description": "Active listings count",
+      "endpoint": "/collections/{symbol}/listings"
+    },
+    {
+      "id": "nft_mint_volume",
+      "domain": "nft_activity",
+      "source": "helius",
+      "type": "counter",
+      "unit": "count",
+      "description": "Minting activity for collection",
+      "endpoint": "/v0/addresses/{address}/transactions",
+      "params": {
+        "address": "string",
+        "type": "MINT"
+      }
+    },
+    {
+      "id": "wallet_sol_balance",
+      "domain": "wallet_flows",
+      "source": "helius",
+      "type": "gauge",
+      "unit": "SOL",
+      "description": "Current SOL balance of a wallet",
+      "endpoint": "/v0/addresses/{address}/balances",
+      "params": {
+        "address": "string"
+      }
+    },
+    {
+      "id": "wallet_total_value_usd",
+      "domain": "wallet_flows",
+      "source": "helius",
+      "type": "gauge",
+      "unit": "USD",
+      "description": "Total portfolio value in USD",
+      "endpoint": "/v0/addresses/{address}/balances"
+    },
+    {
+      "id": "wallet_transactions_count",
+      "domain": "wallet_flows",
+      "source": "helius",
+      "type": "counter",
+      "unit": "count",
+      "description": "Total number of transactions",
+      "endpoint": "/v0/addresses/{address}/transaction-history",
+      "params": {
+        "address": "string",
+        "limit": "number"
+      }
+    },
+    {
+      "id": "wallet_new_addresses",
+      "domain": "wallet_flows",
+      "source": "helius",
+      "type": "counter",
+      "unit": "count",
+      "description": "New wallet addresses created",
+      "endpoint": "/v0/addresses/{address}/transactions",
+      "params": {
+        "address": "string",
+        "type": "ACCOUNT_CREATE"
+      }
+    },
+    {
+      "id": "wallet_active_wallets",
+      "domain": "wallet_flows",
+      "source": "solscan",
+      "type": "gauge",
+      "unit": "count",
+      "description": "Account info and transaction count",
+      "endpoint": "/account/{account}"
+    },
+    {
+      "id": "wallet_dau",
+      "domain": "wallet_flows",
+      "source": "helius",
+      "type": "gauge",
+      "unit": "count",
+      "description": "Daily active unique wallets via SQL",
+      "endpoint": "/api/v2/queries"
+    },
+    {
+      "id": "wallet_retention",
+      "domain": "wallet_flows",
+      "source": "helius",
+      "type": "gauge",
+      "unit": "percentage",
+      "description": "Wallet retention rate via SQL queries",
+      "endpoint": "/api/v2/queries"
+    },
+    {
+      "id": "whale_nft_holdings",
+      "domain": "wallet_flows",
+      "source": "helius",
+      "type": "gauge",
+      "unit": "count",
+      "description": "Number of NFTs held by whale wallet",
+      "endpoint": "/v0/addresses/{address}/nfts",
+      "params": {
+        "address": "string"
+      }
+    },
+    {
+      "id": "whale_transaction_frequency",
+      "domain": "wallet_flows",
+      "source": "helius",
+      "type": "gauge",
+      "unit": "count/day",
+      "description": "Average transactions per day for whale wallet",
+      "endpoint": "/v0/addresses/{address}/transaction-history",
+      "params": {
+        "address": "string",
+        "limit": "number"
+      }
+    },
+    {
+      "id": "whale_token_accumulation",
+      "domain": "wallet_flows",
+      "source": "helius",
+      "type": "counter",
+      "unit": "USD",
+      "description": "Token accumulation by whale wallets",
+      "endpoint": "/v0/addresses/{address}/balances"
+    },
+    {
+      "id": "token_price",
+      "domain": "token_analysis",
+      "source": "jupiter",
+      "type": "gauge",
+      "unit": "USD",
+      "description": "Current token price",
+      "endpoint": "/quote",
+      "params": {
+        "inputMint": "string",
+        "outputMint": "So11111111111111111111111111111111111111112"
+      }
+    },
+    {
+      "id": "token_price_pyth",
+      "domain": "token_analysis",
+      "source": "pyth",
+      "type": "gauge",
+      "unit": "USD",
+      "description": "Token price from Pyth oracle",
+      "endpoint": "/api/latest_price_feeds",
+      "params": {
+        "ids": "string[]"
+      }
+    },
+    {
+      "id": "token_volume_24h",
+      "domain": "token_analysis",
+      "source": "jupiter",
+      "type": "counter",
+      "unit": "USD",
+      "description": "24-hour trading volume",
+      "endpoint": "/v1/tokens/{mint}/volume"
+    },
+    {
+      "id": "token_swap_volume",
+      "domain": "token_analysis",
+      "source": "jupiter",
+      "type": "counter",
+      "unit": "USD",
+      "description": "Total swap volume",
+      "endpoint": "/v6/quote"
+    },
+    {
+      "id": "token_holders_count",
+      "domain": "token_analysis",
+      "source": "helius",
+      "type": "gauge",
+      "unit": "count",
+      "description": "Number of token holders",
+      "endpoint": "/v0/token-metadata"
+    },
+    {
+      "id": "token_market_cap",
+      "domain": "token_analysis",
+      "source": "messari",
+      "type": "gauge",
+      "unit": "USD",
+      "description": "Market capitalization",
+      "endpoint": "/api/v1/assets/{asset}/metrics"
+    },
+    {
+      "id": "token_circulating_supply",
+      "domain": "token_analysis",
+      "source": "messari",
+      "type": "gauge",
+      "unit": "count",
+      "description": "Circulating token supply",
+      "endpoint": "/api/v1/assets/{asset}/metrics"
+    },
+    {
+      "id": "defi_tvl",
+      "domain": "defi_activity",
+      "source": "defillama",
+      "type": "gauge",
+      "unit": "USD",
+      "description": "Total Value Locked in DeFi protocol",
+      "endpoint": "/tvl/{protocol}"
+    },
+    {
+      "id": "defi_tvl_historical",
+      "domain": "defi_activity",
+      "source": "defillama",
+      "type": "timeseries",
+      "unit": "USD",
+      "description": "Historical TVL over time",
+      "endpoint": "/v2/historicalChainTvl/solana",
+      "params": {
+        "start_timestamp": "number",
+        "end_timestamp": "number"
+      }
+    },
+    {
+      "id": "defi_chain_tvl",
+      "domain": "defi_activity",
+      "source": "defillama",
+      "type": "gauge",
+      "unit": "USD",
+      "description": "Total chain TVL on Solana",
+      "endpoint": "/v2/historicalChainTvl/Solana"
+    },
+    {
+      "id": "defi_protocol_tvl",
+      "domain": "defi_activity",
+      "source": "defillama",
+      "type": "gauge",
+      "unit": "USD",
+      "description": "TVL for specific protocol",
+      "endpoint": "/tvl/{protocol}"
+    },
+    {
+      "id": "defi_yield",
+      "domain": "defi_activity",
+      "source": "messari",
+      "type": "gauge",
+      "unit": "percentage",
+      "description": "Annual percentage yield",
+      "endpoint": "/api/v1/metrics/defi/yield-rates"
+    },
+    {
+      "id": "defi_liquidity",
+      "domain": "defi_activity",
+      "source": "jupiter",
+      "type": "gauge",
+      "unit": "USD",
+      "description": "Pool liquidity",
+      "endpoint": "/v6/quote"
+    },
+    {
+      "id": "defi_stablecoin_mcap",
+      "domain": "defi_activity",
+      "source": "defillama",
+      "type": "gauge",
+      "unit": "USD",
+      "description": "Stablecoin market cap",
+      "endpoint": "/stablecoins"
+    },
+    {
+      "id": "protocol_active_users",
+      "domain": "protocol_metrics",
+      "source": "helius",
+      "type": "gauge",
+      "unit": "count",
+      "description": "Number of active users via SQL",
+      "endpoint": "/api/v2/queries"
+    },
+    {
+      "id": "protocol_transaction_volume",
+      "domain": "protocol_metrics",
+      "source": "helius",
+      "type": "counter",
+      "unit": "USD",
+      "description": "Total transaction volume",
+      "endpoint": "/v0/addresses/{address}/transaction-history"
+    },
+    {
+      "id": "protocol_fee_revenue",
+      "domain": "protocol_metrics",
+      "source": "messari",
+      "type": "counter",
+      "unit": "USD",
+      "description": "Protocol fee revenue",
+      "endpoint": "/api/v1/metrics/{asset}/revenue"
+    },
+    {
+      "id": "protocol_new_users",
+      "domain": "protocol_metrics",
+      "source": "helius",
+      "type": "counter",
+      "unit": "count",
+      "description": "New users per period via SQL",
+      "endpoint": "/api/v2/queries"
+    },
+    {
+      "id": "chain_daily_txs",
+      "domain": "protocol_metrics",
+      "source": "solscan",
+      "type": "counter",
+      "unit": "count",
+      "description": "Daily transaction count",
+      "endpoint": "/account/transactions"
+    },
+    {
+      "id": "chain_gas_fees",
+      "domain": "protocol_metrics",
+      "source": "solscan",
+      "type": "counter",
+      "unit": "SOL",
+      "description": "Chain transaction fees from chaininfo",
+      "endpoint": "/chaininfo"
+    },
+    {
+      "id": "market_data_price",
+      "domain": "market_data",
+      "source": "pyth",
+      "type": "gauge",
+      "unit": "USD",
+      "description": "Market price feed",
+      "endpoint": "/api/latest_price_feeds",
+      "params": {
+        "ids": "string[]"
+      }
+    },
+    {
+      "id": "market_data_volume",
+      "domain": "market_data",
+      "source": "messari",
+      "type": "counter",
+      "unit": "USD",
+      "description": "24h trading volume",
+      "endpoint": "/api/v1/assets/{asset}/metrics"
+    },
+    {
+      "id": "market_data_sentiment",
+      "domain": "market_data",
+      "source": "messari",
+      "type": "gauge",
+      "unit": "score",
+      "description": "Market sentiment score",
+      "endpoint": "/api/v1/news/sentiment"
+    },
+    {
+      "id": "custom_sql_query",
+      "domain": "research",
+      "source": "helius",
+      "type": "custom",
+      "unit": "custom",
+      "description": "Custom SQL query",
+      "endpoint": "/api/v2/queries",
+      "params": {
+        "sql": "string"
+      }
+    },
+    {
+      "id": "indexed_transactions",
+      "domain": "protocol_metrics",
+      "source": "solanafm",
+      "type": "counter",
+      "unit": "count",
+      "description": "Indexed transaction data",
+      "endpoint": "/accounts/{account}/transactions"
+    },
+    {
+      "id": "program_interactions",
+      "domain": "protocol_metrics",
+      "source": "solanafm",
+      "type": "counter",
+      "unit": "count",
+      "description": "Program interaction count",
+      "endpoint": "/accounts/{account}/transactions"
+    },
+    {
+      "id": "helius_program_interactions",
+      "domain": "wallet_flows",
+      "source": "helius",
+      "type": "counter",
+      "unit": "count",
+      "description": "Programs interacted by wallet",
+      "endpoint": "/v0/addresses/{address}/transaction-history"
+    },
+    {
+      "id": "helius_collection_metadata",
+      "domain": "nft_activity",
+      "source": "helius",
+      "type": "gauge",
+      "unit": "metadata",
+      "description": "NFT collection metadata and info",
+      "endpoint": "/v0/collections/{collection}"
+    },
+    {
+      "id": "jupiter_best_route",
+      "domain": "token_analysis",
+      "source": "jupiter",
+      "type": "gauge",
+      "unit": "route",
+      "description": "Best swap route between tokens",
+      "endpoint": "/v6/quote"
+    },
+    {
+      "id": "jupiter_price_impact",
+      "domain": "token_analysis",
+      "source": "jupiter",
+      "type": "gauge",
+      "unit": "percentage",
+      "description": "Price impact for swap",
+      "endpoint": "/v6/quote"
+    },
+    {
+      "id": "magiceden_listings_count",
+      "domain": "nft_activity",
+      "source": "magiceden",
+      "type": "gauge",
+      "unit": "count",
+      "description": "Active NFT listings count",
+      "endpoint": "/collections/{symbol}/listings"
+    },
+    {
+      "id": "magiceden_trades_recent",
+      "domain": "nft_activity",
+      "source": "magiceden",
+      "type": "counter",
+      "unit": "count",
+      "description": "Recent trades in collection",
+      "endpoint": "/collections/{symbol}/activities"
+    },
+    {
+      "id": "defillama_historical_tvl",
+      "domain": "defi_activity",
+      "source": "defillama",
+      "type": "timeseries",
+      "unit": "USD",
+      "description": "Historical TVL by date",
+      "endpoint": "/v2/historicalChainTvl/{chain}"
+    },
+    {
+      "id": "defillama_stablecoins",
+      "domain": "defi_activity",
+      "source": "defillama",
+      "type": "gauge",
+      "unit": "USD",
+      "description": "Stablecoin market cap and supply",
+      "endpoint": "/stablecoins"
+    },
+    {
+      "id": "defillama_protocol_tvl_rank",
+      "domain": "defi_activity",
+      "source": "defillama",
+      "type": "gauge",
+      "unit": "rank",
+      "description": "Protocol TVL ranking",
+      "endpoint": "/protocols"
+    },
+    {
+      "id": "messari_market_cap",
+      "domain": "token_analysis",
+      "source": "messari",
+      "type": "gauge",
+      "unit": "USD",
+      "description": "Asset market capitalization",
+      "endpoint": "/api/v1/assets/{asset}/metrics"
+    },
+    {
+      "id": "messari_apy",
+      "domain": "defi_activity",
+      "source": "messari",
+      "type": "gauge",
+      "unit": "percentage",
+      "description": "Annual percentage yield",
+      "endpoint": "/api/v1/yields"
+    },
+    {
+      "id": "messari_protocol_revenue",
+      "domain": "defi_activity",
+      "source": "messari",
+      "type": "counter",
+      "unit": "USD",
+      "description": "Protocol revenue generation",
+      "endpoint": "/api/v1/protocols/{protocol}/revenue"
+    },
+    {
+      "id": "messari_trending_news",
+      "domain": "market_data",
+      "source": "messari",
+      "type": "gauge",
+      "unit": "articles",
+      "description": "Trending cryptocurrency news",
+      "endpoint": "/api/v1/news"
+    },
+    {
+      "id": "pyth_price_history",
+      "domain": "market_data",
+      "source": "pyth",
+      "type": "timeseries",
+      "unit": "USD",
+      "description": "Historical price data",
+      "endpoint": "/api/latest_price_feeds"
+    },
+    {
+      "id": "pyth_price_confidence",
+      "domain": "market_data",
+      "source": "pyth",
+      "type": "gauge",
+      "unit": "confidence",
+      "description": "Price feed confidence interval",
+      "endpoint": "/api/latest_price_feeds"
+    },
+    {
+      "id": "pyth_sol_price",
+      "domain": "market_data",
+      "source": "pyth",
+      "type": "gauge",
+      "unit": "USD",
+      "description": "SOL/USD price from Pyth",
+      "endpoint": "/api/latest_price_feeds"
+    },
+    {
+      "id": "pyth_btc_price",
+      "domain": "market_data",
+      "source": "pyth",
+      "type": "gauge",
+      "unit": "USD",
+      "description": "BTC/USD price from Pyth",
+      "endpoint": "/api/latest_price_feeds"
+    },
+    {
+      "id": "pyth_eth_price",
+      "domain": "market_data",
+      "source": "pyth",
+      "type": "gauge",
+      "unit": "USD",
+      "description": "ETH/USD price from Pyth",
+      "endpoint": "/api/latest_price_feeds"
+    },
+    {
+      "id": "pyth_token_prices",
+      "domain": "market_data",
+      "source": "pyth",
+      "type": "gauge",
+      "unit": "USD",
+      "description": "Multiple token prices batch query",
+      "endpoint": "/api/latest_price_feeds"
+    },
+    {
+      "id": "solanafm_program_txs",
+      "domain": "protocol_metrics",
+      "source": "solanafm",
+      "type": "counter",
+      "unit": "count",
+      "description": "Transactions by account/program",
+      "endpoint": "/accounts/{account}/transactions"
+    },
+    {
+      "id": "solanafm_wallet_txs",
+      "domain": "wallet_flows",
+      "source": "solanafm",
+      "type": "counter",
+      "unit": "count",
+      "description": "Wallet transaction history",
+      "endpoint": "/accounts/{account}/transactions"
+    },
+    {
+      "id": "solanafm_active_programs",
+      "domain": "protocol_metrics",
+      "source": "solanafm",
+      "type": "gauge",
+      "unit": "count",
+      "description": "Account tags and verification",
+      "endpoint": "/accounts/{account}"
+    },
+    {
+      "id": "solanafm_mempool",
+      "domain": "protocol_metrics",
+      "source": "solanafm",
+      "type": "gauge",
+      "unit": "count",
+      "description": "Blocks and transactions",
+      "endpoint": "/blocks"
+    },
+    {
+      "id": "helius_top_wallets",
+      "domain": "wallet_flows",
+      "source": "helius",
+      "type": "gauge",
+      "unit": "count",
+      "description": "Top wallets by balance",
+      "endpoint": "/api/v2/queries"
+    },
+    {
+      "id": "helius_nft_stats",
+      "domain": "nft_activity",
+      "source": "helius",
+      "type": "gauge",
+      "unit": "stats",
+      "description": "NFT collection statistics via SQL",
+      "endpoint": "/api/v2/queries"
+    },
+    {
+      "id": "helius_defi_metrics",
+      "domain": "defi_activity",
+      "source": "helius",
+      "type": "gauge",
+      "unit": "metrics",
+      "description": "DeFi protocol metrics via SQL",
+      "endpoint": "/api/v2/queries"
+    },
+    {
+      "id": "helius_daily_txs",
+      "domain": "protocol_metrics",
+      "source": "helius",
+      "type": "timeseries",
+      "unit": "count",
+      "description": "Daily transaction counts",
+      "endpoint": "/api/v2/queries"
+    },
+    {
+      "id": "helius_custom_query",
+      "domain": "research",
+      "source": "helius",
+      "type": "custom",
+      "unit": "custom",
+      "description": "Flexible SQL-based research query",
+      "endpoint": "/api/v2/queries"
+    }
+  ]
+}
+
+
+
+

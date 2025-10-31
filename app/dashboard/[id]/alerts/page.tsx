@@ -45,7 +45,6 @@ interface Alert {
 
 export default function AlertsPage() {
   const { connected } = useWallet()
-  const { isEnterprise } = useAuth()
   const params = useParams()
   const router = useRouter()
   const dashboardId = params?.id as string
@@ -217,8 +216,8 @@ export default function AlertsPage() {
     }
   }
 
-  // Only require wallet connection for individual users
-  if (!isEnterprise && !connected) {
+  // Require wallet connection
+  if (!connected) {
     return (
       <div className="pt-16 h-screen flex items-center justify-center bg-gradient-to-br from-purple-50 via-indigo-50 to-cyan-50">
         <div className="text-center">

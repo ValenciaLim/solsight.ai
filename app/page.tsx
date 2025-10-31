@@ -34,7 +34,7 @@ export default function HomePage() {
                 AI Analytics
               </span>
               <br />
-              for Solana Users & Enterprises
+              for Solana
             </h1>
             <p className="text-xl text-gray-600 mb-8 max-w-3xl mx-auto">
               A customizable dashboard for wallets, NFTs, and compliance — powered by AI and NLP.
@@ -44,14 +44,8 @@ export default function HomePage() {
                 href="/login"
                 className="inline-flex items-center justify-center px-8 py-3 bg-gradient-to-r from-purple-600 via-indigo-600 to-cyan-500 text-white rounded-lg hover:shadow-lg transition"
               >
-                Launch Individual Dashboard
+                Get Started
                 <ArrowRight className="ml-2 h-5 w-5" />
-              </Link>
-              <Link
-                href="/enterprise-login"
-                className="inline-flex items-center justify-center px-8 py-3 bg-white text-purple-600 rounded-lg border-2 border-purple-600 hover:bg-purple-50 transition"
-              >
-                Enterprise Login
               </Link>
             </div>
           </motion.div>
@@ -79,8 +73,8 @@ export default function HomePage() {
             {[
               {
                 step: '01',
-                title: 'Connect Wallet or Enterprise Login',
-                description: 'Securely connect your Solana wallet or use enterprise authentication to access your dashboard.',
+                title: 'Connect Your Wallet',
+                description: 'Securely connect your Solana wallet to access your personalized dashboard.',
                 icon: Wallet,
                 color: 'from-purple-500 to-indigo-500',
               },
@@ -165,8 +159,8 @@ export default function HomePage() {
               },
               {
                 icon: Shield,
-                title: 'Enterprise Security',
-                description: 'Bank-grade security with multi-wallet monitoring and compliance features for organizations.',
+                title: 'Secure & Private',
+                description: 'Bank-grade security with multi-wallet monitoring and compliance features.',
                 color: 'from-purple-500 to-pink-500',
               },
             ].map((feature, index) => (
@@ -204,7 +198,7 @@ export default function HomePage() {
             <p className="text-lg text-gray-600">Choose the plan that fits your needs</p>
           </motion.div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-3xl mx-auto">
             {[
               {
                 name: 'Free',
@@ -225,7 +219,7 @@ export default function HomePage() {
               {
                 name: 'Pro',
                 price: '$19',
-                description: 'For serious traders',
+                description: 'Unlimited access to all features',
                 features: [
                   'Advanced analytics',
                   'Unlimited wallets',
@@ -234,29 +228,13 @@ export default function HomePage() {
                   'Custom alerts',
                   'Export reports',
                   'NFT tracking',
+                  'Team collaboration',
+                  'Compliance tools',
                 ],
                 cta: 'Start Free Trial',
                 href: '/login',
                 popular: true,
                 color: 'from-purple-500 to-indigo-500',
-              },
-              {
-                name: 'Enterprise',
-                price: 'Custom',
-                description: 'For organizations',
-                features: [
-                  'Everything in Pro',
-                  'Team collaboration',
-                  'Custom integrations',
-                  'Dedicated support',
-                  'SLA guarantee',
-                  'API access',
-                  'Compliance tools',
-                ],
-                cta: 'Contact Sales',
-                href: '/enterprise-login',
-                popular: false,
-                color: 'from-indigo-500 to-cyan-500',
               },
             ].map((plan, index) => (
               <motion.div
@@ -320,7 +298,7 @@ export default function HomePage() {
                 Solana Analytics
               </h3>
               <p className="text-gray-400">
-                Real-time AI-powered analytics for Solana users and enterprises.
+                Real-time AI-powered analytics for Solana users.
               </p>
             </div>
             <div>

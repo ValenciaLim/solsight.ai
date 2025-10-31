@@ -39,60 +39,61 @@ const iconMap: { [key: string]: any } = {
   'Target': Target,
   'Activity': Activity,
 }
-import { PublicKey, Connection } from '@solana/web3.js'
 
-// Mock data for charts
-const portfolioData = [
-  { date: 'Jan', value: 10000 },
-  { date: 'Feb', value: 10500 },
-  { date: 'Mar', value: 11200 },
-  { date: 'Apr', value: 11000 },
-  { date: 'May', value: 12450 },
-]
-
-const nftData = [
-  { name: 'CryptoPunks', count: 3, value: 4500 },
-  { name: 'Bored Ape', count: 2, value: 3200 },
-  { name: 'Other', count: 5, value: 2100 },
-]
+// Format source name for display
+function formatSourceName(source: string): string {
+  const sourceMap: Record<string, string> = {
+    'helius': 'Helius API',
+    'magiceden': 'Magic Eden API',
+    'jupiter': 'Jupiter API',
+    'defillama': 'DeFiLlama API',
+    'messari': 'Messari API',
+    'pyth': 'Pyth Network',
+    'solscan': 'Solscan API',
+    'solanafm': 'SolanaFM API',
+  }
+  return sourceMap[source.toLowerCase()] || source.charAt(0).toUpperCase() + source.slice(1).toLowerCase() + ' API'
+}
 
 export default function DashboardPage() {
   const { connected, publicKey } = useWallet()
   const { connection } = useConnection()
-  const { isEnterprise } = useAuth()
   const router = useRouter()
   const params = useParams()
   const dashboardId = params?.id as string
-
-  // Initialize whale data hook
-  const { whaleData, loading: whaleLoading } = useWhaleData(true)
 
   const [balance, setBalance] = useState(0)
   const [loading, setLoading] = useState(true)
   const [dashboardData, setDashboardData] = useState<any>(null)
   const [sidebarOpen, setSidebarOpen] = useState(true)
+  const [whaleDataEnabled, setWhaleDataEnabled] = useState(false)
+  const [chartData, setChartData] = useState<Record<string, any[]>>({})
+  const [chartErrors, setChartErrors] = useState<Record<string, string>>({})
+  const [statsData, setStatsData] = useState<Record<string, { value: string; error?: string }>>({})
+  const [isFetchingData, setIsFetchingData] = useState(false)
+  const [dataSources, setDataSources] = useState<string[]>([])
 
   // Load dashboard from localStorage
   useEffect(() => {
     if (!dashboardId) return
 
-    // Check both 'dashboards' (individual) and 'enterprise_dashboards' (enterprise)
-    const individualDashboards = localStorage.getItem('dashboards')
+    // Check both dashboards storages for backward compatibility
+    const dashboards = localStorage.getItem('dashboards')
     const enterpriseDashboards = localStorage.getItem('enterprise_dashboards')
     
     let dashboard = null
     
-    // Try individual dashboards first
-    if (individualDashboards) {
+    // Try regular dashboards first
+    if (dashboards) {
       try {
-        const parsed = JSON.parse(individualDashboards)
+        const parsed = JSON.parse(dashboards)
         dashboard = parsed.find((d: any) => d.id === dashboardId)
       } catch (error) {
-        console.error('Error parsing individual dashboards:', error)
+        console.error('Error parsing dashboards:', error)
       }
     }
     
-    // If not found, try enterprise dashboards
+    // If not found, try enterprise dashboards (for backward compatibility)
     if (!dashboard && enterpriseDashboards) {
       try {
         const parsed = JSON.parse(enterpriseDashboards)
@@ -125,6 +126,92 @@ export default function DashboardPage() {
 
     fetchBalance()
   }, [connected, publicKey, connection])
+
+  // Enable whale data loading after initial page load
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setWhaleDataEnabled(true)
+    }, 1000) // 1 second delay to ensure page is fully loaded
+
+    return () => clearTimeout(timer)
+  }, [])
+
+  // Fetch chart data when dashboard is loaded
+  useEffect(() => {
+    const fetchChartData = async () => {
+      if ((!dashboardData?.config?.charts && !dashboardData?.config?.stats) || !publicKey) return
+
+      setIsFetchingData(true)
+      try {
+        const response = await fetch('/api/dashboard-fetch', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            charts: dashboardData.config.charts || [],
+            stats: dashboardData.config.stats || [],
+            walletAddress: publicKey.toString(),
+          }),
+        })
+
+        const result = await response.json()
+        
+        // Handle chart data
+        if (result.charts) {
+          const dataMap: Record<string, any[]> = {}
+          const errorMap: Record<string, string> = {}
+          const sourcesSet = new Set<string>()
+          
+          result.charts.forEach((r: any) => {
+            if (r.error) {
+              errorMap[r.chartId] = r.error
+            } else {
+              dataMap[r.chartId] = r.data
+            }
+            
+            // Collect unique sources
+            if (r.source) {
+              sourcesSet.add(r.source)
+            }
+          })
+          
+          setChartData(dataMap)
+          setChartErrors(errorMap)
+          console.log('✅ Fetched chart data:', dataMap)
+          if (Object.keys(errorMap).length > 0) {
+            console.warn('⚠️ Chart errors:', errorMap)
+          }
+        }
+
+        // Handle stats data
+        if (result.stats) {
+          const statsMap: Record<string, { value: string; error?: string }> = {}
+          const sourcesSet = new Set<string>(dataSources)
+          
+          result.stats.forEach((r: any) => {
+            statsMap[r.statId] = {
+              value: r.value,
+              error: r.error,
+            }
+            
+            // Collect unique sources
+            if (r.source) {
+              sourcesSet.add(r.source)
+            }
+          })
+          
+          setStatsData(statsMap)
+          setDataSources(Array.from(sourcesSet))
+          console.log('✅ Fetched stats data:', statsMap)
+        }
+      } catch (error) {
+        console.error('Error fetching chart data:', error)
+      } finally {
+        setIsFetchingData(false)
+      }
+    }
+
+    fetchChartData()
+  }, [dashboardData, publicKey])
 
   // Update dashboard filters in localStorage
   const updateDashboardFilters = (updatedFilters: any[]) => {
@@ -275,8 +362,8 @@ export default function DashboardPage() {
     }
   }
 
-  // Only require wallet connection for individual users
-  if (!isEnterprise && !connected) {
+  // Require wallet connection
+  if (!connected) {
     return (
       <div className="pt-16 h-screen flex items-center justify-center bg-gradient-to-br from-purple-50 via-indigo-50 to-cyan-50">
         <div className="text-center">
@@ -314,15 +401,6 @@ export default function DashboardPage() {
             >
               {/* Header */}
               <div>
-                {isEnterprise && (
-                  <Link 
-                    href="/admin" 
-                    className="inline-flex items-center space-x-2 text-gray-600 hover:text-gray-900 mb-4 transition"
-                  >
-                    <ArrowLeft className="h-5 w-5" />
-                    <span className="font-medium">Back to Admin</span>
-                  </Link>
-                )}
                 <h1 className="text-3xl font-bold text-gray-900 mb-2">{dashboardData.name}</h1>
                 <p className="text-gray-600">
                   Welcome back! Here&apos;s your portfolio overview.
@@ -334,9 +412,14 @@ export default function DashboardPage() {
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
                   {dashboardData.config.stats.map((stat: any, index: number) => {
                     const Icon = iconMap[stat.icon] || Coins
+                    const statId = stat.id || `stat-${index}`
+                    const statValue = statsData[statId]?.value !== undefined 
+                      ? statsData[statId].value 
+                      : stat.value || 'Loading...'
+                    
                     return (
                       <motion.div
-                        key={stat.id || index}
+                        key={statId}
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: index * 0.1 }}
@@ -371,7 +454,17 @@ export default function DashboardPage() {
                         </div>
                         <div>
                           <p className="text-sm text-gray-600 mb-1">{stat.label}</p>
-                          <p className="text-2xl font-bold text-gray-900">{stat.value}</p>
+                          <p className="text-2xl font-bold text-gray-900">
+                            {statValue}
+                          </p>
+                          {statsData[statId]?.error && (
+                            <p className="text-xs text-red-500 mt-1">{statsData[statId].error}</p>
+                          )}
+                          {isFetchingData && statValue === 'Loading...' && (
+                            <div className="mt-2">
+                              <div className="animate-pulse h-2 bg-gray-200 rounded w-1/2"></div>
+                            </div>
+                          )}
                         </div>
                       </motion.div>
                     )
@@ -482,12 +575,14 @@ export default function DashboardPage() {
                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 {dashboardData.config?.charts && dashboardData.config.charts.length > 0 ? (
                   dashboardData.config.charts.map((chart: any, index: number) => {
-                    // Get filtered data
+                    // Get filtered data - use only real data, no mock fallback
                     const getChartData = () => {
                       let filteredData: any[] = []
-                      if (chart.dataSource === 'NFT') filteredData = [...nftData]
-                      else if (chart.dataSource === 'Portfolio') filteredData = [...portfolioData]
-                      else filteredData = [...portfolioData]
+                      
+                      // Use fetched chart data if available
+                      if (chartData[chart.id]) {
+                        filteredData = [...chartData[chart.id]]
+                      }
 
                       // Apply filters to data
                       const filters = dashboardData.config?.filters || []
@@ -529,10 +624,49 @@ export default function DashboardPage() {
                       return filteredData
                     }
 
-                    const chartData = getChartData()
+                    const chartDataForRender = getChartData()
+                    const hasError = chartErrors[chart.id]
+                    const isEmpty = chartDataForRender.length === 0 && !hasError
 
                     const renderChart = () => {
-                      const data = chartData
+                      // Show error message if there's an error
+                      if (hasError) {
+                        return (
+                          <div className="flex flex-col items-center justify-center h-[250px] space-y-4 p-8">
+                            <div className="bg-red-50 border-2 border-red-200 rounded-lg p-6 w-full">
+                              <div className="flex items-start space-x-3">
+                                <svg className="w-6 h-6 text-red-600 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                                <div className="flex-1">
+                                  <h3 className="text-sm font-semibold text-red-900 mb-1">Data Fetch Error</h3>
+                                  <p className="text-sm text-red-700">{hasError}</p>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        )
+                      }
+
+                      // Show loading if data is being fetched
+                      if (isEmpty && isFetchingData) {
+                        return (
+                          <div className="flex items-center justify-center h-[250px]">
+                            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600"></div>
+                          </div>
+                        )
+                      }
+
+                      // Show empty state if no data and not fetching
+                      if (isEmpty && !isFetchingData) {
+                        return (
+                          <div className="flex items-center justify-center h-[250px] text-gray-500">
+                            <p>No data available</p>
+                          </div>
+                        )
+                      }
+
+                      const data = chartDataForRender
                       const xAxisKey = data[0] && 'name' in data[0] ? 'name' : 'date'
                       
                       if (chart.type === 'line') {
@@ -648,7 +782,7 @@ export default function DashboardPage() {
                         key={chart.id || index}
                         chart={chart}
                         chartIndex={index}
-                        data={chartData}
+                        data={chartDataForRender}
                         renderChart={renderChart}
                         onDelete={deleteChart}
                         dashboardId={dashboardId}
@@ -663,22 +797,26 @@ export default function DashboardPage() {
               </div>
 
               {/* Data Sources Section */}
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="bg-gradient-to-br from-purple-50 via-indigo-50 to-cyan-50 p-6 rounded-xl border border-purple-200"
-              >
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">Data Sources</h3>
-                <div className="flex items-center justify-between p-4 bg-white rounded-lg">
-                  <div>
-                    <p className="font-medium text-gray-900">Data Providers</p>
-                    <p className="text-sm text-gray-500">Helius, Pyth Network, Jupiter API</p>
+              {dataSources.length > 0 && (
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="bg-gradient-to-br from-purple-50 via-indigo-50 to-cyan-50 p-6 rounded-xl border border-purple-200"
+                >
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Data Sources</h3>
+                  <div className="flex items-center justify-between p-4 bg-white rounded-lg">
+                    <div>
+                      <p className="font-medium text-gray-900">Data Providers</p>
+                      <p className="text-sm text-gray-500">
+                        {dataSources.map(s => formatSourceName(s)).join(', ')}
+                      </p>
+                    </div>
+                    <div className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm font-medium">
+                      Real-time
+                    </div>
                   </div>
-                  <div className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm font-medium">
-                    Real-time
-                  </div>
-                </div>
-              </motion.div>
+                </motion.div>
+              )}
             </motion.div>
           </main>
         </div>

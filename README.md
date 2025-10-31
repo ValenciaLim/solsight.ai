@@ -1,23 +1,25 @@
 # Solana Analytics SaaS
 
-A real-time AI-powered analytics platform for Solana users and enterprises, built with Next.js, Tailwind CSS, Framer Motion, and Vercel AI SDK.
+A real-time AI-powered analytics platform for Solana users, built with Next.js, Tailwind CSS, Framer Motion, and Vercel AI SDK.
 
 ## 🚀 Features
 
-### Individual Users
+### Core Features
 - **Wallet Connection**: Connect with Phantom, Solflare, and other Solana wallets
 - **AI-Powered Dashboard**: Personalized analytics based on onboarding preferences
 - **NLP Commands**: Natural language interface for dashboard customization
-- **Real-time Analytics**: Live portfolio tracking with mock blockchain data
+- **Real-time Analytics**: Live portfolio tracking with real blockchain data
 - **AI Insights**: Intelligent recommendations and market analysis
 - **Smart Alerts**: Customizable notifications for price changes and activity
 
-### Enterprise Users
-- **Multi-wallet Management**: Monitor multiple organizational wallets
+### Advanced Features
+- **Multi-wallet Management**: Monitor multiple wallets and portfolios
 - **Pre-built Templates**: Government, Financial, and DAO dashboard templates
-- **Team Collaboration**: Role-based access and team management
+- **AI Agent Integration**: Connect external AI agents for advanced analytics
 - **Compliance Tools**: Regulatory compliance and audit trail features
-- **Advanced Analytics**: Deep insights into treasury and operations
+- **Advanced Analytics**: Deep insights into treasury, operations, and whale behavior
+- **Dashboard Management**: Create, customize, and manage multiple dashboards
+- **Team Collaboration**: Share dashboards and insights with your team
 
 ## 🛠 Tech Stack
 
@@ -50,15 +52,8 @@ npm install
    # AI Integration
    OPENAI_API_KEY=your_openai_api_key_here
    
-   # Envio (Blockchain Indexing)
-   NEXT_PUBLIC_ENVIO_GRAPHQL_ENDPOINT=http://localhost:8080/v1/graphql
-   NEXT_PUBLIC_ENVIO_HYPERSYNC_ENDPOINT=https://neon-evm.hypersync.xyz
-   
    # Helius (Solana Data)
    NEXT_PUBLIC_HELIUS_API_KEY=your_helius_api_key_here
-   
-   # Pyth Network (Price Data)
-   NEXT_PUBLIC_PYTH_ENDPOINT=https://hermes.pyth.network
    
    # Solana RPC
    NEXT_PUBLIC_SOLANA_RPC_URL=https://api.mainnet-beta.solana.com
@@ -72,21 +67,14 @@ npm run dev
 5. **Open your browser**
    Navigate to [http://localhost:3000](http://localhost:3000)
 
-## 🎯 User Flows
+## 🎯 User Flow
 
-### Individual User Flow
-1. **Home Page** → "Launch Individual Dashboard"
+1. **Home Page** → "Get Started"
 2. **Login** → Connect Solana wallet (Phantom/Solflare)
 3. **Onboarding** → Complete questionnaire or use NLP commands
 4. **Dashboard** → View personalized analytics and insights
 5. **AI Chat** → Use NLP sidebar for dashboard customization
-
-### Enterprise User Flow
-1. **Home Page** → "Enterprise Login"
-2. **Enterprise Login** → Sign in with organization credentials
-3. **Admin Panel** → Manage wallets and team access
-4. **Template Selection** → Choose from pre-built dashboard templates
-5. **Dashboard Creation** → Generate analytics for multiple wallets
+6. **Advanced Features** → Manage wallets, AI agents, and dashboards
 
 ## 🔧 Configuration
 
@@ -115,25 +103,19 @@ The platform uses Vercel AI SDK for:
 
 ## 📊 Data Sources
 
-SolSight integrates real on-chain data from multiple sources:
+SolSight integrates real on-chain data from Helius API:
 
-### Envio (Blockchain Indexing)
-- **HyperIndex**: Historical NFT transfer data via GraphQL
-- **HyperSync**: Real-time WebSocket streaming (available but not active)
-- **Network**: Neon Mainnet (EVM on Solana)
-- **Data**: NFT transfers indexed from smart contracts
-- See [ENVIO_INTEGRATION.md](./ENVIO_INTEGRATION.md) for details
+### Helius (Solana Data Provider)
+- **Wallet Portfolio Data**: SOL balances, token holdings, NFT collections
+- **Transaction History**: Complete transaction tracking and analysis
+- **NFT Metadata**: Collection information, floor prices, and attributes
+- **Price Data**: Real-time token prices via CoinGecko API integration
+- **DAS API**: Digital Asset Standard for comprehensive NFT data
 
-### Pyth Network (Price Data)
-- Real-time SOL/USD price feeds
-- Historical price data for analytics
-
-### Helius (Wallet Data)
-- Wallet portfolio data
-- Token balances and NFT holdings
-- Transaction history
-
-**Note**: Currently using mock data for wallet portfolios due to address format incompatibility (Ethereum vs Solana addresses from Envio).
+### Jupiter API (DeFi Integration)
+- DeFi position tracking
+- Swap and liquidity data
+- Yield farming analytics
 
 ## 🎨 Design System
 
@@ -165,7 +147,7 @@ The app can be deployed to any platform that supports Next.js:
 
 ## 📈 Roadmap
 
-- [ ] Real blockchain data integration (Helius API)
+- [x] Real blockchain data integration (Helius API)
 - [ ] Advanced DeFi analytics
 - [ ] NFT marketplace integration
 - [ ] Mobile app development

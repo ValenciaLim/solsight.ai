@@ -9,7 +9,7 @@ import { useAuth } from '../providers/AuthProvider'
 
 export default function Navbar() {
   const { connected } = useWallet()
-  const { user, logout, isEnterprise, isIndividual } = useAuth()
+  const { user, logout } = useAuth()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
   return (
@@ -31,9 +31,6 @@ export default function Navbar() {
           <div className="hidden md:flex items-center space-x-4">
             {user && (
               <div className="flex items-center space-x-2">
-                <span className="text-sm text-gray-600">
-                  {user.role === 'enterprise' ? 'Enterprise' : 'Individual'}
-                </span>
                 <button
                   onClick={logout}
                   className="p-2 text-gray-400 hover:text-red-600 transition"
@@ -63,9 +60,6 @@ export default function Navbar() {
               <>
                 {user && (
                   <div className="flex items-center justify-between pt-2 border-t border-gray-200">
-                    <span className="text-sm text-gray-600">
-                      {user.role === 'enterprise' ? 'Enterprise' : 'Individual'}
-                    </span>
                     <button
                       onClick={logout}
                       className="flex items-center text-red-600 hover:text-red-700 transition"

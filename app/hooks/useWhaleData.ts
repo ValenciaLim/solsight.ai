@@ -1,139 +1,183 @@
 /**
  * Custom Hook: useWhaleData
  * 
- * Fetches and combines data from:
- * 1. Envio - NFT transfers
- * 2. Helius - Wallet portfolios, transaction history
- * 3. Pyth - SOL price data
+ * Fetches data from:
+ * 1. Helius - Wallet portfolios, transaction history, NFT data
  * 
  * Returns unified whale analytics data for dashboard, alerts, and reports
  */
 
 import { useState, useEffect } from 'react'
-import { fetchNFTTransfers } from '../lib/envio-client-simple'
 import { 
   fetchWalletPortfolio, 
   fetchTransactionHistory,
-  analyzeWhaleBehavior 
-} from '../lib/helius-client'
-import { fetchSOLPrice } from '../lib/pyth-client'
+  analyzeWhaleBehavior,
+  fetchWalletNFTs,
+  getAssetsByOwner,
+  fetchSOLPrice
+} from '../lib/fetchers/helius'
 
 export interface WhaleData {
-  transfers: any[]
   whaleWallets: any[]
   ownershipData: any[]
   transactionHistory: any[]
   behaviorAnalysis: any
-  solPrice: number
+  nftData: any[]
   stats: {
-    totalTransfers: number
     uniqueWallets: number
     totalWhaleWallets: number
     avgPortfolioValue: number
+    totalNFTs: number
   }
 }
 
 export function useWhaleData(enabled: boolean = true) {
   const [whaleData, setWhaleData] = useState<WhaleData | null>(null)
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState(false) // Start as false to prevent blocking
   const [error, setError] = useState<string | null>(null)
+  const [isInitialized, setIsInitialized] = useState(false)
 
   useEffect(() => {
-    if (!enabled) return
+    if (!enabled || isInitialized) return
 
+    // Use requestIdleCallback or setTimeout to defer heavy operations
+    const fetchDataWhenIdle = () => {
     const fetchAllData = async () => {
       try {
         setLoading(true)
-        console.log('🐋 Fetching whale data from all APIs...')
+          console.log('🐋 Fetching whale data from Helius API...')
 
-        // 1. Fetch NFT transfers from Envio
-        console.log('📊 Fetching NFT transfers from Envio...')
-        const transfers = await fetchNFTTransfers(50)
-        console.log(`✅ Loaded ${transfers.length} transfers from Envio`)
+          // 1. Create mock whale wallet addresses for demonstration
+          const mockWhaleAddresses = [
+            '9WzDXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9zYtAWWM', // Only one address initially
+          ]
 
-        // 2. Extract unique wallet addresses from transfers
-        const uniqueWallets = Array.from(new Set([
-          ...transfers.map(t => t.from),
-          ...transfers.map(t => t.to)
-        ]))
+          // 2. Fetch wallet portfolios from Helius (reduced scope)
+          console.log('💼 Fetching wallet portfolios from Helius...')
+          const whaleWallets = []
+          for (const address of mockWhaleAddresses) {
+            try {
+              const portfolio = await fetchWalletPortfolio(address)
+              if (portfolio.solBalance > 0) {
+                whaleWallets.push({
+                  wallet: address,
+                  solBalance: portfolio.solBalance,
+                  tokens: portfolio.tokens || [],
+                  nftCount: portfolio.nftCount || 0,
+                })
+              }
+            } catch (error) {
+              console.warn(`Failed to fetch portfolio for ${address}:`, error)
+            }
+          }
 
-        // 3. Fetch wallet portfolios from Helius (top 10 wallets)
-        console.log('💼 Fetching wallet portfolios from Helius...')
-        console.log('⚠️  Note: Envio returns Ethereum addresses (0x...), but Helius expects Solana addresses')
-        console.log('⚠️  Skipping Helius wallet portfolio fetch for now')
-        
-        // Skip Helius wallet portfolio fetch as Envio returns Ethereum addresses
-        // and Helius expects Solana addresses
-        // Instead, create mock whale wallet data from Envio transfers
-        const whaleWallets = uniqueWallets.slice(0, 5).map(wallet => ({
-          wallet,
-          solBalance: Math.random() * 1000 + 100, // Mock SOL balance 100-1100
-          tokens: [],
-          nftCount: Math.floor(Math.random() * 50),
-        }))
+          console.log(`✅ Loaded ${whaleWallets.length} whale wallets from Helius`)
 
-        console.log(`✅ Created ${whaleWallets.length} mock whale wallets from Envio transfers`)
+          // 3. Set initial data immediately to prevent UI blocking
+          const initialData: WhaleData = {
+            whaleWallets,
+            ownershipData: whaleWallets.map((w: any) => ({
+              wallet: w.wallet,
+              solBalance: w.solBalance,
+              usdValue: w.solBalance * 100, // Default price
+              tokenCount: w.tokens?.length || 0,
+              nftCount: w.nftCount || 0,
+            })),
+            transactionHistory: [],
+            behaviorAnalysis: null,
+            nftData: [],
+            stats: {
+              uniqueWallets: whaleWallets.length,
+              totalWhaleWallets: whaleWallets.length,
+              avgPortfolioValue: whaleWallets.length > 0
+                ? whaleWallets.reduce((sum: number, w: any) => sum + (w.solBalance * 100), 0) / whaleWallets.length
+                : 0,
+              totalNFTs: 0,
+            }
+          }
 
-        // 4. Fetch transaction history for top whale
-        console.log('📜 Fetching transaction history...')
+          setWhaleData(initialData)
+          setError(null)
+          setLoading(false)
+          setIsInitialized(true)
+
+          // 4. Fetch additional data in background (non-blocking)
+          setTimeout(async () => {
+            try {
+              console.log('🔄 Fetching additional data in background...')
+              
+              // Fetch SOL price
+              const solPrice = await fetchSOLPrice()
+              console.log(`✅ SOL price: $${solPrice.toFixed(2)}`)
+
+              // Fetch transaction history (reduced limit)
         const txHistory = whaleWallets.length > 0 
-          ? await fetchTransactionHistory(whaleWallets[0].wallet, 20)
-          : []
+                ? await fetchTransactionHistory(whaleWallets[0].wallet, 10)
+                : []
 
-        // 5. Analyze whale behavior
+              // Fetch NFT data
+              let nftData = []
+              if (whaleWallets.length > 0) {
+                try {
+                  nftData = await fetchWalletNFTs(whaleWallets[0].wallet)
+                } catch (error) {
+                  console.warn('Failed to fetch NFT data:', error)
+                  nftData = []
+                }
+              }
+
+              // Analyze whale behavior
         let behaviorAnalysis = null
         if (whaleWallets.length > 0) {
-          behaviorAnalysis = await analyzeWhaleBehavior(whaleWallets[0].wallet, 50)
-        }
+                behaviorAnalysis = await analyzeWhaleBehavior(whaleWallets[0].wallet, 20)
+              }
 
-        // 6. Fetch SOL price from Pyth
-        console.log('💰 Fetching SOL price from Pyth...')
-        const solPrice = await fetchSOLPrice()
-        console.log(`✅ SOL price: $${solPrice.toFixed(2)}`)
-
-        // 7. Calculate ownership concentration
-        const ownershipData = whaleWallets.map((w: any) => ({
+              // Update with complete data
+              setWhaleData(prev => ({
+                ...prev,
+                ownershipData: whaleWallets.map((w: any) => ({
           wallet: w.wallet,
           solBalance: w.solBalance,
           usdValue: w.solBalance * solPrice,
           tokenCount: w.tokens?.length || 0,
           nftCount: w.nftCount || 0,
-        }))
-
-        // 8. Calculate aggregate stats
-        const stats = {
-          totalTransfers: transfers.length,
-          uniqueWallets: uniqueWallets.length,
+                })),
+                transactionHistory: txHistory,
+                behaviorAnalysis,
+                nftData,
+                stats: {
+                  uniqueWallets: whaleWallets.length,
           totalWhaleWallets: whaleWallets.length,
           avgPortfolioValue: whaleWallets.length > 0
             ? whaleWallets.reduce((sum: number, w: any) => sum + (w.solBalance * solPrice), 0) / whaleWallets.length
             : 0,
-        }
+                  totalNFTs: nftData.length,
+                }
+              }))
 
-        // 9. Combine all data
-        const combinedData: WhaleData = {
-          transfers,
-          whaleWallets,
-          ownershipData,
-          transactionHistory: txHistory,
-          behaviorAnalysis,
-          solPrice,
-          stats,
-        }
+              console.log('✅ Background data loading completed!')
+            } catch (err) {
+              console.error('Error fetching background data:', err)
+            }
+          }, 100) // Small delay to ensure UI is responsive
 
-        console.log('✅ Whale data loaded successfully!')
-        setWhaleData(combinedData)
-        setError(null)
       } catch (err) {
         console.error('Error fetching whale data:', err)
         setError(err instanceof Error ? err.message : 'Unknown error')
-      } finally {
         setLoading(false)
       }
     }
 
     fetchAllData()
-  }, [enabled])
+    }
+
+    // Use requestIdleCallback if available, otherwise setTimeout
+    if (typeof window !== 'undefined' && 'requestIdleCallback' in window) {
+      (window as any).requestIdleCallback(fetchDataWhenIdle, { timeout: 2000 })
+    } else {
+      setTimeout(fetchDataWhenIdle, 0)
+    }
+  }, [enabled, isInitialized])
 
   return { whaleData, loading, error }
 }

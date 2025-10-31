@@ -70,7 +70,7 @@ export default function SettingsPage() {
     data: {
       autoRefresh: true,
       refreshInterval: 30,
-      dataSources: ['helius', 'pyth', 'jupiter']
+      dataSources: ['helius', 'jupiter']
     }
   })
   const [saving, setSaving] = useState(false)
@@ -370,7 +370,7 @@ export default function SettingsPage() {
               <div>
                           <label className="text-sm font-medium text-gray-900 mb-2 block">Data Sources</label>
                           <div className="space-y-2">
-                            {['helius', 'pyth', 'jupiter', 'raydium'].map((source) => (
+                            {['helius', 'jupiter', 'raydium'].map((source) => (
                               <label key={source} className="flex items-center">
                                 <input
                                   type="checkbox"

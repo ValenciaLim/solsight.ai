@@ -6,29 +6,29 @@ import Link from 'next/link'
 import { useWallet } from '@solana/wallet-adapter-react'
 import { WalletMultiButton } from '@solana/wallet-adapter-react-ui'
 import { useRouter } from 'next/navigation'
-import { useEffect, useRef } from 'react'
+import { useEffect } from 'react'
 import { useAuth } from '../providers/AuthProvider'
 
 export default function LoginPage() {
   const { connected } = useWallet()
-  const { login, user } = useAuth()
+  const { user } = useAuth()
   const router = useRouter()
-  const hasLoggedIn = useRef(false)
 
   useEffect(() => {
-    if (connected && !user && !hasLoggedIn.current) {
-      // Auto-login as individual user when wallet connects
-      hasLoggedIn.current = true
-      login('individual@example.com', 'individual')
+    // Redirect to dashboard when user is logged in and wallet is connected
+    console.log('Login page state:', { user, connected })
+    if (user && connected) {
+      console.log('Redirecting to dashboard...')
       router.push('/dashboard')
     }
-  }, [connected, login, user, router])
+  }, [user, connected, router])
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-600 via-indigo-600 to-cyan-500 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3 }}
         className="max-w-md w-full space-y-8"
       >
         <div className="text-center">

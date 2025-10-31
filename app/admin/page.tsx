@@ -323,9 +323,9 @@ export default function AdminPage() {
         >
           {/* Header */}
           <div className="mb-8">
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">Enterprise User</h1>
+            <h1 className="text-3xl font-bold text-gray-900 mb-2">Advanced Features</h1>
             <p className="text-gray-600">
-              Manage your organization&apos;s Solana analytics and team access
+              Manage your Solana analytics, wallets, and AI agents
             </p>
           </div>
 

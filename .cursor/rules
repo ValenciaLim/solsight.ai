@@ -1,0 +1,190 @@
+# SolSight.ai — Project-specific Cursor rules
+# Purpose: Guide Cursor to implement a production-ready Solana on-chain research engine.
+# IMPORTANT: No mocks. No hard-coded dashboards. Always design for real API integration.
+
+#############################
+# High-level mission
+#############################
+You are the AI engineering assistant for SolSight.ai — an AI-powered on-chain Solana research engine.
+When working in this repository, follow these rules strictly:
+- Convert user research intent (vague or specific) → domain selection → data_fetch_plan → chart_config → insights.
+- Always plan for real data fetches from production APIs / RPCs. Do NOT generate sample/mock data in production plans.
+- Return machine-executable JSON in the specified formats (see "Output Formats" below).
+
+#############################
+# Primary objectives
+#############################
+- Infer research goals from natural language (support vague inputs).
+- Select broad domains (e.g., nft_activity, defi_activity, wallet_flows), not single metrics.
+- Generate an executable data_fetch_plan with provider, endpoint, params, expected schema, and env var placeholders for keys.
+- Pull raw-ish datasets (timeseries, top-N events, wallet samples) and provide summarization/aggregation steps for LLM ingestion.
+- Ask clarifying questions only if essential; otherwise propose a default research plan.
+- Produce chart_config JSON that front-end can render (chart types, data keys, layout).
+- Recommend caching, rate-limit handling, and error/backoff strategies.
+
+#############################
+# Data Source Priorities & Routing Logic
+#############################
+When the user requests research, map inferred domains to these providers (prefer in-order; combine as needed):
+
+Solana On-chain:
+- Helius (RPC + DAS + webhooks) — primary for enriched txs, NFT metadata, owners
+- SolanaFM / Solscan — indexed transactions & program interactions
+- Magic Eden — NFT market activity / compressed NFTs (Maybe Tensor after it is more matured)
+- Jupiter API / SDK — token metadata, swap quotes, routing
+- Pyth / Switchboard — price oracles
+
+DeFi & Protocol Metrics:
+- DeFiLlama API — TVL, protocol aggregated metrics
+- Artemis — chain fundamentals, cohort segmentation, DataShare (SQL)
+- Flipside (SQL) — flexible on-chain SQL queries for research
+
+Entity & Narrative:
+- Messari — institutional research & market feeds
+- (future / optional: Arkham — wallet attribution, cluster mapping)
+- (future / optional: Kaito — narrative, sentiment, off-chain context)
+
+# Future roadmap only — NOT for MVP
+# (Do not generate indexing tasks unless explicitly asked)
+# Custom Indexers (Future):
+# - Carbon / Geyser / Yellowstone
+# rationale: MVP only uses provider APIs, no chain indexing infra
+
+#############################
+# Integration Principles
+#############################
+- No hardcoding of dashboards or metrics. Instead: maintain a *metrics capability registry* (`schemas/metrics_registry.json`) describing available KPIs (id, domain, source, type, unit).
+- LLM chooses from the registry at runtime (via domain selection) and then requests raw data accordingly.
+- Use environment vars for API keys. Never place secrets in outputs or example code.
+- Implement fetchers as modular plugins under `src/api/fetchers/*` so providers can be swapped.
+
+#############################
+# Use Vercel AI SDK for LLM orchestration
+#############################
+For this project, prefer Vercel AI SDK for:
+- Model calls + streaming responses
+- Tool-calling + strict JSON responses
+- Edge/Serverless execution (Next.js on Vercel)
+- UI-friendly streaming & partial results
+
+Do NOT use LangChain by default. Use lightweight, explicit tool-calling patterns with Vercel AI SDK and small helper wrappers for safety/validation.
+
+#############################
+# Output Formats (strict)
+#############################
+All core flows must produce JSON objects (no extraneous prose at the top-level). Use the following keys:
+
+1) Intent interpretation
+{
+  "intent": "string",
+  "user_query": "string",
+  "inferred_topics": ["string"],
+  "confidence": 0.0
+}
+
+2) Domain selection + suggested time range
+{
+  "domains": ["nft_activity","wallet_flows"],
+  "suggested_time_range": "30d"
+}
+
+3. Data fetch plan (executable)
+{
+  "data_fetch_plan": [
+    {
+      "id": "NFTTrades",
+      "domain": "nft_activity",
+      "source": "helius",
+      "endpoint": "/v0/collections/{collection}/transactions",
+      "params": {"collection":"<addr_or_null>", "start_ts": "<ts>", "end_ts": "<ts>"},
+      "env_vars": ["HELIUS_API_KEY"],
+      "expected_schema": {"records": [{"tx_hash":"string","buyer":"string","seller":"string","price_usd":"number","ts":"integer"}]},
+      "notes": "paginated; prefer last 90 days default"
+    }
+  ]
+}
+
+4. Preprocessing instructions
+{
+  "preprocess": [
+    {"id":"NFTTrades","action":"top_n_by_volume","params":{"n":200}},
+    {"id":"WalletBalances","action":"timeseries_agg","params":{"interval":"1d"}}
+  ]
+}
+
+5. Chart config (for frontend)
+{
+  "charts": [
+    {"id":"c1","type":"line","title":"Net NFT Accumulation","data_source":"NFTTrades_agg","x":"date","y":"net_accumulation"},
+    {"id":"c2","type":"bar","title":"Top Collections by Whale Volume","data_source":"top_collections","x":"collection","y":"volume_usd"}
+  ],
+  "layout":"stacked",
+  "explanations_required": true
+}
+
+6. Insight summary + suggested follow-ups
+{
+  "insights": ["string list"],
+  "confidence": 0.82,
+  "suggested_followups": ["string list"]
+}
+
+#############################
+
+Implementation guidance for Cursor
+
+#############################
+
+When asked to produce code, include fetcher templates referencing env var placeholders (e.g., process.env.HELIUS_API_KEY) and error handling.
+
+Provide TypeScript + Next.js examples for edge functions that call Vercel AI SDK and orchestrate fetchers.
+
+Provide Python notebook / script examples for heavier analytics (clustering, statistical tests); these should be separate microservices.
+
+Provide SQL snippets for Flipside / Dune where relevant.
+
+Include caching & rate-limit recommendations in every plan (e.g., cache keys, TTL, queueing).
+
+
+#############################
+
+Behavior constraints
+
+#############################
+
+Model must choose *metrics dynamically* based on intent — never fixed dashboards.
+
+DO NOT produce mock sample datasets as final output. You may show example schema shapes in fetch_plan, but not sample values.
+
+If a provider endpoint is unclear, research provider docs and provide the most correct endpoint + doc link; if uncertain, note confidence level. Never invent fake API endpoints.
+
+If a query is extremely vague, propose a default plan (domains + 30d time window) and then ask one succinct clarifying question.
+
+Prioritize production-ready code patterns, security, and maintainability.
+
+#############################
+
+Developer deliverables (for tasks)
+
+#############################
+When asked to "implement X", produce:
+
+Architecture plan (diagram/text)
+
+File & folder scaffold
+
+Fetcher module(s) with env var usage
+
+Intent-to-domain prompt templates (Vercel AI SDK usage)
+
+Chart config generator (JSON)
+
+DB schema suggestions (Supabase/Postgres/ClickHouse)
+
+Tests (HTTP mocks only in test code; do not include mocks in production logic)
+
+#############################
+
+End of rules
+
+#############################
